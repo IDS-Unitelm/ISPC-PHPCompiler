@@ -466,6 +466,31 @@ compile_openssl() {
     #check_return_code
 }
 
+compile_openssl_centos7() {
+    local version="1.1.1w"
+    local prefix="/usr/local/openssl-${version}"
+
+    if [ -x "${prefix}/bin/openssl" ]; then
+        return
+    fi
+
+    wget "https://www.openssl.org/source/openssl-${version}.tar.gz" -O "/tmp/openssl-${version}.tar.gz"
+    check_return_code
+    if [ "$(sha256sum "/tmp/openssl-${version}.tar.gz" | cut -d' ' -f1)" != "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8" ]; then
+        echo "OpenSSL ${version} checksum mismatch"
+        exit 126
+    fi
+
+    tar -xzf "/tmp/openssl-${version}.tar.gz" -C /tmp
+    check_return_code
+    (cd "/tmp/openssl-${version}" && ./config --prefix="${prefix}" --openssldir="${prefix}/ssl" shared zlib && make -j"$(grep -c ^processor /proc/cpuinfo)" && make install_sw)
+    check_return_code
+    echo "${prefix}/lib" > /etc/ld.so.conf.d/openssl-1.1.1w.conf
+    ldconfig
+    check_return_code
+    rm -rf "/tmp/openssl-${version}" "/tmp/openssl-${version}.tar.gz"
+}
+
 compile_freetype() {
     version="2.10.1"
 
@@ -537,6 +562,12 @@ compile() {
         compile_openssl
         #openssl="--with-openssl --with-openssl-dir=/tmp/openssl"
 	openssl="--with-openssl PKG_CONFIG_PATH=/tmp/openssl/bin/lib/pkgconfig"
+    fi
+
+    if [ "${DISTRO}" == "centos7" ] && [ "${CURRENT_PHP_VERSION}" -ge 80 ]; then
+        compile_openssl_centos7
+        openssl="--with-openssl=/usr/local/openssl-1.1.1w"
+        export PKG_CONFIG_PATH="/usr/local/openssl-1.1.1w/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
     fi
 
     if [ "${CURRENT_PHP_VERSION}" -gt 73 ]; then
