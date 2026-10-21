@@ -15,6 +15,10 @@ declare -A VERSIONS=(
     ["PHP 8.1.25"]="https://www.php.net/distributions/php-8.1.25.tar.gz"
     ["PHP 8.2.12"]="https://www.php.net/distributions/php-8.2.12.tar.gz"
     ["PHP 8.2.30"]="https://www.php.net/distributions/php-8.2.30.tar.gz"
+    ["PHP 8.2.35"]="https://www.php.net/distributions/php-8.2.35.tar.gz"
+    ["PHP 8.3.36"]="https://www.php.net/distributions/php-8.3.36.tar.gz"
+    ["PHP 8.4.27"]="https://www.php.net/distributions/php-8.4.27.tar.gz"
+    ["PHP 8.5.12"]="https://www.php.net/distributions/php-8.5.12.tar.gz"
 )
 
 # All PHP versions checksum
@@ -30,4 +34,8 @@ declare -A CHECKSUM=(
     ["PHP 8.1.25"]="1a8c59d6b3eccb404c229e947558d2bf1220c3dec0b0036690fadc07f39934ab"
     ["PHP 8.2.12"]="b2b74a91f5fac14ce10ece0ac210f6f5d72f4367a3cb638e80d117d183750a21"
     ["PHP 8.2.30"]="a0fa6673ba4b0c8335fbab08afb7c2e13a3791f2b5a0928c7ad3d7ad872edf26"
+    ["PHP 8.2.35"]="9db4204f0a2d1911277ae832185e07bb4c3b3559772753a70d2968ca346d6910"
+    ["PHP 8.3.36"]="c93f3441f87f6ab156bef4432db215d7e61ca2c0183bb3a2aa28d9886ab59f53"
+    ["PHP 8.4.27"]="5bafed9994c1a49796b25b5f61c22c9183bfe046b6acc7b363842d03c77f972f"
+    ["PHP 8.5.12"]="81a0f450349e84b08eb43faa85f8a4c835684f3cc1c50471775d1317a046c525"
 )
