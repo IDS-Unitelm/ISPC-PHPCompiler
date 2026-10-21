@@ -270,6 +270,21 @@ install_dependencies() {
     if [ "${DISTRO}" == "centos7" ]; then
         yum -y --nogpgcheck install gcc make libc-client-devel libxml2-devel pkgconfig openssl-devel bzip2-devel libldb-devel curl-devel libpng-devel libpng-devel libjpeg-devel libXpm-devel freetype-devel gmp-devel libmcrypt-devel mariadb-devel aspell-devel recode-devel httpd-devel postgresql-devel libxslt-devel libwebp-devel libvpx-devel libicu-devel gcc-c++ pkg-config zlib-devel libsqlite3x-devel oniguruma-devel readline-devel
         check_return_code
+
+        wget https://libzip.org/download/libzip-0.11.2.tar.gz -O /tmp/libzip-0.11.2.tar.gz
+        check_return_code
+        if [ "$(sha256sum /tmp/libzip-0.11.2.tar.gz | cut -d' ' -f1)" != "83db1fb43a961ff7d1d1b50e1c6bea09c67e6af867686d1fc92ecb7dc6cf98d5" ]; then
+            echo "libzip 0.11.2 checksum mismatch"
+            exit 126
+        fi
+        tar -xzf /tmp/libzip-0.11.2.tar.gz -C /tmp
+        check_return_code
+        (cd /tmp/libzip-0.11.2 && ./configure --prefix=/usr/local && make -j"$(grep -c ^processor /proc/cpuinfo)" && make install)
+        check_return_code
+        ldconfig
+        check_return_code
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
+        rm -rf /tmp/libzip-0.11.2 /tmp/libzip-0.11.2.tar.gz
     fi
     
     if [ "${DISTRO}" == "centos8" ]; then
