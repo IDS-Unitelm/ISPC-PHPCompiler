@@ -268,11 +268,7 @@ install_dependencies() {
     fi
     
     if [ "${DISTRO}" == "centos7" ]; then
-        yum -y --nogpgcheck install gcc make libc-client-devel libxml2-devel pkgconfig openssl-devel bzip2-devel libldb-devel curl-devel libpng-devel libpng-devel libjpeg-devel libXpm-devel freetype-devel gmp-devel libmcrypt-devel mariadb-devel aspell-devel recode-devel httpd-devel postgresql-devel libxslt-devel libwebp-devel libvpx-devel libicu-devel gcc-c++ libzip-devel pkg-config zlib-devel libsqlite3x-devel oniguruma-devel readline-devel
-        check_return_code
-        wget http://packages.psychotic.ninja/7/plus/x86_64/RPMS/libzip-0.11.2-6.el7.psychotic.x86_64.rpm -O /tmp/libzip.rpm
-        check_return_code
-        wget http://packages.psychotic.ninja/7/plus/x86_64/RPMS/libzip-devel-0.11.2-6.el7.psychotic.x86_64.rpm -O /tmp/libzip-devel.rpm
+        yum -y --nogpgcheck install gcc make libc-client-devel libxml2-devel pkgconfig openssl-devel bzip2-devel libldb-devel curl-devel libpng-devel libpng-devel libjpeg-devel libXpm-devel freetype-devel gmp-devel libmcrypt-devel mariadb-devel aspell-devel recode-devel httpd-devel postgresql-devel libxslt-devel libwebp-devel libvpx-devel libicu-devel gcc-c++ pkg-config zlib-devel libsqlite3x-devel oniguruma-devel readline-devel
         check_return_code
         rpm -Uvh /tmp/libzip.rpm /tmp/libzip-devel.rpm
         check_return_code
