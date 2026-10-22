@@ -155,6 +155,93 @@ detect_distro() {
 
 }
 
+install_isolated_deps_ubuntu1804() {
+    local prefix="/opt/php-deps"
+    local cpus
+    cpus="$(grep -c ^processor /proc/cpuinfo 2>/dev/null || echo 2)"
+    mkdir -p "${prefix}"
+
+    # 1. OpenSSL 1.1.1w
+    if [ ! -f "${prefix}/lib/libssl.so" ] && [ ! -f "${prefix}/lib64/libssl.so" ]; then
+        echo -e "Compiling isolated OpenSSL 1.1.1w in ${prefix}..."
+        wget -c "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" -O "/tmp/openssl-1.1.1w.tar.gz"
+        check_return_code
+        if [ "$(sha256sum "/tmp/openssl-1.1.1w.tar.gz" | cut -d' ' -f1)" != "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8" ]; then
+            echo "OpenSSL checksum mismatch"
+            exit 126
+        fi
+        tar -xzf "/tmp/openssl-1.1.1w.tar.gz" -C /tmp
+        check_return_code
+        (cd "/tmp/openssl-1.1.1w" && ./config --prefix="${prefix}" --openssldir="${prefix}/ssl" shared zlib && make -j"${cpus}" && make install_sw)
+        check_return_code
+        rm -rf "/tmp/openssl-1.1.1w" "/tmp/openssl-1.1.1w.tar.gz"
+    fi
+
+    # 2. libxml2 2.9.14
+    if [ ! -f "${prefix}/lib/libxml2.so" ] && [ ! -f "${prefix}/lib64/libxml2.so" ]; then
+        echo -e "Compiling isolated libxml2 2.9.14 in ${prefix}..."
+        wget -c "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz" -O "/tmp/libxml2-2.9.14.tar.xz"
+        check_return_code
+        if [ "$(sha256sum "/tmp/libxml2-2.9.14.tar.xz" | cut -d' ' -f1)" != "60d74a257d1ccec0475e749cba2f21559e48139efba6ff28224357c7c798dfee" ]; then
+            echo "libxml2 checksum mismatch"
+            exit 126
+        fi
+        tar -xf "/tmp/libxml2-2.9.14.tar.xz" -C /tmp
+        check_return_code
+        (cd "/tmp/libxml2-2.9.14" && ./configure --prefix="${prefix}" --without-python && make -j"${cpus}" && make install)
+        check_return_code
+        rm -rf "/tmp/libxml2-2.9.14" "/tmp/libxml2-2.9.14.tar.xz"
+    fi
+
+    # 3. libxslt 1.1.34
+    if [ ! -f "${prefix}/lib/libxslt.so" ] && [ ! -f "${prefix}/lib64/libxslt.so" ]; then
+        echo -e "Compiling isolated libxslt 1.1.34 in ${prefix}..."
+        wget -c "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.34.tar.xz" -O "/tmp/libxslt-1.1.34.tar.xz"
+        check_return_code
+        if [ "$(sha256sum "/tmp/libxslt-1.1.34.tar.xz" | cut -d' ' -f1)" != "98b1bd46d6792925ad2dfe9a87452ea2adebf69dcb9919ffd55bf926a7f93f7f" ]; then
+            echo "libxslt checksum mismatch"
+            exit 126
+        fi
+        tar -xf "/tmp/libxslt-1.1.34.tar.xz" -C /tmp
+        check_return_code
+        (cd "/tmp/libxslt-1.1.34" && ./configure --prefix="${prefix}" --with-libxml-prefix="${prefix}" --without-python && make -j"${cpus}" && make install)
+        check_return_code
+        rm -rf "/tmp/libxslt-1.1.34" "/tmp/libxslt-1.1.34.tar.xz"
+    fi
+
+    # 4. libzip 0.11.2
+    if [ ! -f "${prefix}/lib/libzip.so" ] && [ ! -f "${prefix}/lib64/libzip.so" ]; then
+        echo -e "Compiling isolated libzip 0.11.2 in ${prefix}..."
+        wget -c "https://libzip.org/download/libzip-0.11.2.tar.gz" -O "/tmp/libzip-0.11.2.tar.gz"
+        check_return_code
+        if [ "$(sha256sum "/tmp/libzip-0.11.2.tar.gz" | cut -d' ' -f1)" != "83db1fb43a961ff7d1d1b50e1c6bea09c67e6af867686d1fc92ecb7dc6cf98d5" ]; then
+            echo "libzip checksum mismatch"
+            exit 126
+        fi
+        tar -xzf "/tmp/libzip-0.11.2.tar.gz" -C /tmp
+        check_return_code
+        (cd "/tmp/libzip-0.11.2" && ./configure --prefix="${prefix}" && make -j"${cpus}" && make install)
+        check_return_code
+        rm -rf "/tmp/libzip-0.11.2" "/tmp/libzip-0.11.2.tar.gz"
+    fi
+
+    # 5. ICU 69.1 (for intl extension)
+    if [ ! -f "${prefix}/lib/libicuuc.so" ] && [ ! -f "${prefix}/lib64/libicuuc.so" ]; then
+        echo -e "Compiling isolated ICU 69.1 in ${prefix}..."
+        wget -c "https://github.com/unicode-org/icu/releases/download/release-69-1/icu4c-69_1-src.tgz" -O "/tmp/icu4c-69_1-src.tgz"
+        check_return_code
+        if [ "$(sha256sum "/tmp/icu4c-69_1-src.tgz" | cut -d' ' -f1)" != "4cba7b7acd1d3c42c44bb0c14be6637098c7faf2b330ce876bc5f3b915d09745" ]; then
+            echo "ICU checksum mismatch"
+            exit 126
+        fi
+        tar -xzf "/tmp/icu4c-69_1-src.tgz" -C /tmp
+        check_return_code
+        (cd "/tmp/icu/source" && ./configure --prefix="${prefix}" --disable-samples --disable-tests && make -j"${cpus}" && make install)
+        check_return_code
+        rm -rf "/tmp/icu" "/tmp/icu4c-69_1-src.tgz"
+    fi
+}
+
 install_dependencies() {
     if [ "${DISTRO}" == "devuan1" ]; then
         apt-get -y install build-essential autoconf libfcgi-dev libfcgi0ldbl libjpeg62-turbo-dbg libmcrypt-dev libssl-dev libc-client2007e libc-client2007e-dev libxml2-dev libbz2-dev libcurl4-openssl-dev libjpeg-dev libpng12-dev libfreetype6-dev libkrb5-dev libpq-dev libxml2-dev libxslt1-dev libwebp-dev libvpx-dev libicu-dev libzip-dev pkg-config zlib1g-dev libsqlite3-dev libonig-dev icu-devtools libreadline-dev libgmp-dev
@@ -230,10 +317,22 @@ install_dependencies() {
     fi
 
     if [ "${DISTRO}" == "ubuntu-18.04" ]; then
-        apt-get -y install build-essential autoconf libfcgi-dev libfcgi0ldbl libmcrypt-dev libssl-dev libldb-dev libldap2-dev libc-client2007e libc-client2007e-dev libxml2-dev libbz2-dev libcurl4-openssl-dev libjpeg-dev libfreetype6-dev libkrb5-dev libpq-dev libxml2-dev libxslt1-dev libwebp-dev libvpx-dev libc-client2007e-dev libicu-dev libzip-dev pkg-config zlib1g-dev libsqlite3-dev libonig-dev icu-devtools libreadline-dev libgmp-dev
+        # Install base packages that do not conflict with third-party PPAs (like sury.org)
+        apt-get -y install build-essential autoconf pkg-config zlib1g-dev libsqlite3-dev libonig-dev libreadline-dev libgmp-dev libcurl4-openssl-dev libjpeg-dev libpng-dev libfreetype6-dev libbz2-dev libkrb5-dev libpq-dev libwebp-dev libvpx-dev libmcrypt-dev libfcgi-dev libfcgi0ldbl
         check_return_code
-        ln -s  /usr/include/x86_64-linux-gnu/curl  /usr/include/curl
-        ln -s /usr/lib/libc-client.a /usr/lib/x86_64-linux-gnu/libc-client.a
+
+        # Attempt to install optional packages if available without breaking system
+        apt-get -y install libc-client2007e libc-client2007e-dev libldap2-dev libldb-dev 2>/dev/null || true
+
+        # Check if development packages for SSL, XML, Zip, ICU can be installed from APT without conflicts
+        # If conflicts are detected (e.g. sury.org PPA installed), build them into /opt/php-deps to protect production services (PHP 7.x)
+        if ! apt-get -y install libssl-dev libxml2-dev libxslt1-dev libzip-dev libicu-dev 2>/dev/null; then
+            echo "Third-party repository conflicts detected (e.g. sury.org). Installing isolated build dependencies in /opt/php-deps to protect running PHP services..."
+            install_isolated_deps_ubuntu1804
+        fi
+
+        ln -s  /usr/include/x86_64-linux-gnu/curl  /usr/include/curl 2>/dev/null || true
+        ln -s /usr/lib/libc-client.a /usr/lib/x86_64-linux-gnu/libc-client.a 2>/dev/null || true
     fi
     
     if [ "${DISTRO}" == "ubuntu-20.04" ]; then
@@ -526,6 +625,15 @@ compile() {
     jpg="--with-jpeg-dir=/usr"
     openssl="--with-openssl"
     ldap="--with-ldap"
+    libxml="--with-libxml-dir=/usr"
+
+    if [ -d "/opt/php-deps" ]; then
+        export PKG_CONFIG_PATH="/opt/php-deps/lib/pkgconfig:/opt/php-deps/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
+        export LDFLAGS="-Wl,-rpath,/opt/php-deps/lib:/opt/php-deps/lib64 -L/opt/php-deps/lib -L/opt/php-deps/lib64 ${LDFLAGS}"
+        export CPPFLAGS="-I/opt/php-deps/include ${CPPFLAGS}"
+        openssl="--with-openssl=/opt/php-deps"
+        libxml="--with-libxml-dir=/opt/php-deps"
+    fi
     if [ "${DISTRO}" == "centos7" ] || [ "${DISTRO}" == "centos8" ]; then
         libdir="--with-libdir=lib64"
         zip="--enable-zip"
@@ -576,12 +684,13 @@ compile() {
         jpg="--with-jpeg"
         webp="--with-webp"
         zip="--with-zip"
+        libxml=""
     fi
 
     # shellcheck disable=SC2086
     (cd "${COMPILE_PATH}/${FOLDER_NAME}" && ./configure CFLAGS="-O3 ${ADDITIONAL_CFLAGS}" \
         --prefix=${CURRENT_PHP_PATH} --with-pdo-pgsql --with-zlib-dir ${freetype} --enable-mbstring \
-        --with-libxml-dir=/usr --enable-soap --enable-calendar --with-curl --with-mcrypt \
+        ${libxml} --enable-soap --enable-calendar --with-curl --with-mcrypt \
         --with-zlib ${gd} --with-pgsql --disable-rpath --enable-inline-optimization \
         --with-bz2 --with-zlib --enable-sockets --enable-sysvsem --enable-sysvshm \
         --enable-pcntl --enable-mbregex --enable-exif --enable-bcmath --with-mhash \
