@@ -201,21 +201,21 @@ install_isolated_deps_ubuntu1804() {
         rm -rf "/tmp/libxml2-2.9.14" "/tmp/libxml2-2.9.14.tar.xz"
     fi
 
-    # 3. libxslt 1.1.34
+    # 3. libxslt 1.1.39
     if [ ! -f "${prefix}/lib/libxslt.so" ] && [ ! -f "${prefix}/lib64/libxslt.so" ]; then
-        echo -e "Compiling isolated libxslt 1.1.34 in ${prefix}..."
-        rm -f "/tmp/libxslt-1.1.34.tar.xz"
-        wget "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.34.tar.xz" -O "/tmp/libxslt-1.1.34.tar.xz"
+        echo -e "Compiling isolated libxslt 1.1.39 in ${prefix}..."
+        rm -f "/tmp/libxslt-1.1.39.tar.xz"
+        wget "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.39.tar.xz" -O "/tmp/libxslt-1.1.39.tar.xz"
         check_return_code
-        if [ "$(sha256sum "/tmp/libxslt-1.1.34.tar.xz" | cut -d' ' -f1)" != "28c47db33ab4daefa6232f31ccb3c65260c825151ec86ec461355247f3f56824" ]; then
+        if [ "$(sha256sum "/tmp/libxslt-1.1.39.tar.xz" | cut -d' ' -f1)" != "2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" ]; then
             echo "libxslt checksum mismatch"
             exit 126
         fi
-        tar -xf "/tmp/libxslt-1.1.34.tar.xz" -C /tmp
+        tar -xf "/tmp/libxslt-1.1.39.tar.xz" -C /tmp
         check_return_code
-        (cd "/tmp/libxslt-1.1.34" && ./configure --prefix="${prefix}" --with-libxml-prefix="${prefix}" --without-python && make -j"${cpus}" && make install)
+        (cd "/tmp/libxslt-1.1.39" && ./configure --prefix="${prefix}" --with-libxml-prefix="${prefix}" --without-python && make -j"${cpus}" && make install)
         check_return_code
-        rm -rf "/tmp/libxslt-1.1.34" "/tmp/libxslt-1.1.34.tar.xz"
+        rm -rf "/tmp/libxslt-1.1.39" "/tmp/libxslt-1.1.39.tar.xz"
     fi
 
     # 4. libzip 0.11.2
