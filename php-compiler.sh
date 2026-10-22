@@ -640,8 +640,8 @@ compile() {
     xmlrpc="--with-xmlrpc"
     imap="--with-imap --with-imap-ssl --with-kerberos"
 
-    if [ ! -f "/usr/include/c-client/utf8.h" ] && [ ! -f "/usr/include/imap/utf8.h" ] && [ ! -f "/usr/include/utf8.h" ]; then
-        echo "IMAP c-client development headers (utf8.h) not found. Skipping IMAP extension."
+    if [ "${DISTRO}" == "ubuntu-18.04" ] || [ -d "/opt/php-deps" ] || { [ ! -f "/usr/include/c-client/utf8.h" ] && [ ! -f "/usr/include/imap/utf8.h" ] && [ ! -f "/usr/include/utf8.h" ]; }; then
+        echo "Skipping IMAP extension (c-client headers unavailable or conflict with OpenSSL)."
         imap=""
     fi
 
