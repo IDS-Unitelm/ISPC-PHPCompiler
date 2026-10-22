@@ -8,6 +8,8 @@ CURRENT_PHP_PATH="" # like /opt/php70
 CURRENT_PHP_NAME="" # like php70
 CURRENT_PHP_VERSION="" # like 70
 OUTPUT=""
+PHP_74_CVE_SELECTION="PHP 7.4.31-dev CVE-2026 patched"
+PHP_74_CVE_SOURCE_DIR="php-src-712e60f9edfd03f0960fc4fc3c2c375f42b90aa2"
 
 #-- Helpers Functions
 
@@ -47,7 +49,7 @@ check_folder() {
 download_extract() {
 
     ARCHIVE_NAME=${1##*/}
-    FOLDER_NAME=${ARCHIVE_NAME/.tar.gz/}
+    FOLDER_NAME=${3:-${ARCHIVE_NAME/.tar.gz/}}
 
     echo -e "Downloading ${1}..."
     wget --no-check-certificate "${1}" -O "${COMPILE_PATH}/${ARCHIVE_NAME}"
@@ -62,7 +64,23 @@ download_extract() {
     fi
 
         echo -e "Extracting ${ARCHIVE_NAME}..."
-    tar zxf "${COMPILE_PATH}/${ARCHIVE_NAME}" -C "${COMPILE_PATH}"
+    if [ -n "${3}" ]; then
+        check_folder "${COMPILE_PATH}/${FOLDER_NAME}"
+        tar zxf "${COMPILE_PATH}/${ARCHIVE_NAME}" --strip-components=1 -C "${COMPILE_PATH}/${FOLDER_NAME}"
+    else
+        tar zxf "${COMPILE_PATH}/${ARCHIVE_NAME}" -C "${COMPILE_PATH}"
+    fi
+    check_return_code
+}
+
+install_php_source_build_tools() {
+    if [ "${DISTRO}" == "centos7" ]; then
+        yum -y install autoconf bison re2c
+    elif [ "${DISTRO}" == "centos8" ]; then
+        dnf -y install autoconf bison re2c
+    else
+        apt-get -y install autoconf bison re2c
+    fi
     check_return_code
 }
 
@@ -810,7 +828,9 @@ install() {
 check_symlink() {
         if [ ! -f "/usr/bin/${CURRENT_PHP_NAME}" ]; then
                 ln -s "${CURRENT_PHP_PATH}/bin/php" "/usr/bin/${CURRENT_PHP_NAME}"
-                update-alternatives --install /usr/bin/php php "/opt/${CURRENT_PHP_NAME}/bin/php" "${CURRENT_PHP_VERSION}"
+        if [ "${USER_SELECTION}" != "${PHP_74_CVE_SELECTION}" ]; then
+            update-alternatives --install /usr/bin/php php "/opt/${CURRENT_PHP_NAME}/bin/php" "${CURRENT_PHP_VERSION}"
+        fi
         fi
 }
 
@@ -848,10 +868,17 @@ elaborate_selection() {
                 exit
         fi
 
-    escaped_selection="${USER_SELECTION//\"/}"
-    CURRENT_PHP_NAME="php${escaped_selection:4:1}${escaped_selection:6:1}"
-    CURRENT_PHP_PATH="/opt/${CURRENT_PHP_NAME}"
-    CURRENT_PHP_VERSION="${escaped_selection:4:1}${escaped_selection:6:1}"
+    if [ "${USER_SELECTION}" == "${PHP_74_CVE_SELECTION}" ]; then
+        CURRENT_PHP_NAME="php74-cve"
+        CURRENT_PHP_VERSION="74"
+        CURRENT_PHP_PATH="/opt/${CURRENT_PHP_NAME}"
+        FOLDER_NAME="${PHP_74_CVE_SOURCE_DIR}"
+    else
+        escaped_selection="${USER_SELECTION//\"/}"
+        CURRENT_PHP_NAME="php${escaped_selection:4:1}${escaped_selection:6:1}"
+        CURRENT_PHP_PATH="/opt/${CURRENT_PHP_NAME}"
+        CURRENT_PHP_VERSION="${escaped_selection:4:1}${escaped_selection:6:1}"
+    fi
 
     if { [ "${DISTRO}" == "centos8" ] || [ "${DISTRO}" == "debian9" ] || [ "${DISTRO}" == "debian10" ] || [ "${DISTRO}" == "debian11" ] || [ "${DISTRO}" == "devuan2" ] || [ "${DISTRO}" == "devuan3" ] || [ "${DISTRO}" == "ubuntu-18.04" ] || [ "${DISTRO}" == "ubuntu-20.04" ] || [ "${DISTRO}" == "ubuntu-22.04" ]; } && [ "${CURRENT_PHP_NAME}" == "php56" ]; then
         echo -e "Your current distro(${DISTRO}) not support this php version building (${CURRENT_PHP_NAME}). Sorry..."
@@ -866,7 +893,14 @@ elaborate_selection() {
     echo -e "Checking compile path..."
     check_folder "${COMPILE_PATH}"
 
-    download_extract "${VERSIONS[$USER_SELECTION]}" "${CHECKSUM[$USER_SELECTION]}"
+    if [ "${USER_SELECTION}" == "${PHP_74_CVE_SELECTION}" ]; then
+        download_extract "${VERSIONS[$USER_SELECTION]}" "${CHECKSUM[$USER_SELECTION]}" "${PHP_74_CVE_SOURCE_DIR}"
+        install_php_source_build_tools
+        (cd "${COMPILE_PATH}/${FOLDER_NAME}" && ./buildconf --force)
+        check_return_code
+    else
+        download_extract "${VERSIONS[$USER_SELECTION]}" "${CHECKSUM[$USER_SELECTION]}"
+    fi
 
     echo -e "Compiling..."
     if [ ! -d "${CURRENT_PHP_PATH}" ]; then

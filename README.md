@@ -29,6 +29,16 @@ wget https://raw.githubusercontent.com/IDS-Unitelm/ISPC-PHPCompiler/bash-version
 (**) On Ubuntu 18.04, third-party repository conflicts (e.g. `deb.sury.org`) are automatically handled by compiling dependencies (OpenSSL 1.1.1w, libxml2, libxslt, libzip, ICU) into `/opt/php-deps` with runtime RPATH isolation, leaving existing production PHP services intact.
 (***) On Ubuntu 22.x PHP <= 8.0 only without OpenSSL.
 
+## Experimental: PHP 7.4 CVE mitigation
+
+The menu includes **PHP 7.4.31-dev CVE-2026 patched**, built from the PHP source commit `712e60f9edfd03f0960fc4fc3c2c375f42b90aa2` on the upstream `PHP-7.4-CVE-2026-109618-109619` branch. The source archive is pinned to that commit and verified with SHA-256 before extraction; the build does not follow the moving branch name. This commit's `main/php_version.h` identifies it as PHP 7.4.31-dev, not 7.4.33.
+
+This is a community backport for an end-of-life PHP line, not an official PHP release or a replacement for upgrading to a supported PHP version. It installs separately under `/opt/php74-cve`, creates the `php74-cve` command and `php74-cve-fpm` service, and does not automatically change the system `php` alternative. Build preparation requires `autoconf`, `bison`, and `re2c`.
+
+The mitigation changes multipart parsing and disables the RFC1867 upload-progress callback. Test application uploads and any use of `PHP_SESSION_UPLOAD_PROGRESS` before production deployment. Run the PHP test suite and the project's `tests/` checks on the target operating system before relying on this build.
+
+See [the PHP 7.4 CVE build notes](examples/php74-cve/README.md) for installation, validation, and rollback guidance.
+
 # EOL
 
 The script should also work on:
