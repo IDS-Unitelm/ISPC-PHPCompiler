@@ -634,8 +634,8 @@ compile() {
     jpg="--with-jpeg-dir=/usr"
     openssl="--with-openssl"
     ldap="--with-ldap"
-    if [ ! -f "/usr/include/ldap.h" ] && [ ! -f "/usr/local/include/ldap.h" ]; then
-        echo "LDAP development headers (ldap.h) not found. Skipping LDAP extension."
+    if [ "${DISTRO}" == "ubuntu-18.04" ] || [ -d "/opt/php-deps" ] || { [ ! -f "/usr/include/ldap.h" ] && [ ! -f "/usr/local/include/ldap.h" ]; }; then
+        echo "Skipping LDAP extension."
         ldap=""
     fi
     libxml="--with-libxml-dir=/usr"
