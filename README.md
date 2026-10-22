@@ -15,17 +15,19 @@ wget https://raw.githubusercontent.com/IDS-Unitelm/ISPC-PHPCompiler/bash-version
 
 # Currently supported platforms
 
-| OS \ PHP     	| 5.6 	| 7.0 	| 7.1 	| 7.2 	| 7.3 	| 7.4 	| 8.0 	| 8.1  | 8.2 RC  |
-|--------------	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|
-| Debian 9     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
-| Debian 10    	|     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
-| Debian 11    	|     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
-| Centos 7     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
-| Ubuntu 18.04 	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
-| Ubuntu 20.04 	|     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
-| Ubuntu 22.04 * 	|     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
+| OS \ PHP     	| 5.6 	| 7.0 	| 7.1 	| 7.2 	| 7.3 	| 7.4 	| 8.0 	| 8.1  | 8.2  | 8.3  | 8.4  |
+|--------------	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|-----	|
+| Debian 9     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|      |      |
+| Debian 10    	|     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
+| Debian 11    	|     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
+| CentOS 7 *   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
+| Ubuntu 18.04 **|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
+| Ubuntu 20.04 	|     	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
+| Ubuntu 22.04 *** |   	|     	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	| ✔️   	|
 
-(*) on Ubuntu 22.x PHP <= 8.0 only without OpenSSL
+(*) On CentOS 7, OpenSSL 1.1.1w and libzip are compiled automatically in isolated prefixes when building PHP >= 8.0.
+(**) On Ubuntu 18.04, third-party repository conflicts (e.g. `deb.sury.org`) are automatically handled by compiling dependencies (OpenSSL 1.1.1w, libxml2, libxslt, libzip, ICU) into `/opt/php-deps` with runtime RPATH isolation, leaving existing production PHP services intact.
+(***) On Ubuntu 22.x PHP <= 8.0 only without OpenSSL.
 
 # EOL
 
