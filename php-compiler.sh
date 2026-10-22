@@ -161,10 +161,17 @@ install_isolated_deps_ubuntu1804() {
     cpus="$(grep -c ^processor /proc/cpuinfo 2>/dev/null || echo 2)"
     mkdir -p "${prefix}"
 
+    export PATH="${prefix}/bin:${PATH}"
+    export PKG_CONFIG_PATH="${prefix}/lib/pkgconfig:${prefix}/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
+    export LD_LIBRARY_PATH="${prefix}/lib:${prefix}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LDFLAGS="-L${prefix}/lib -L${prefix}/lib64 ${LDFLAGS}"
+    export CPPFLAGS="-I${prefix}/include ${CPPFLAGS}"
+
     # 1. OpenSSL 1.1.1w
     if [ ! -f "${prefix}/lib/libssl.so" ] && [ ! -f "${prefix}/lib64/libssl.so" ]; then
         echo -e "Compiling isolated OpenSSL 1.1.1w in ${prefix}..."
-        wget -c "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" -O "/tmp/openssl-1.1.1w.tar.gz"
+        rm -f "/tmp/openssl-1.1.1w.tar.gz"
+        wget "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" -O "/tmp/openssl-1.1.1w.tar.gz"
         check_return_code
         if [ "$(sha256sum "/tmp/openssl-1.1.1w.tar.gz" | cut -d' ' -f1)" != "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8" ]; then
             echo "OpenSSL checksum mismatch"
@@ -180,7 +187,8 @@ install_isolated_deps_ubuntu1804() {
     # 2. libxml2 2.9.14
     if [ ! -f "${prefix}/lib/libxml2.so" ] && [ ! -f "${prefix}/lib64/libxml2.so" ]; then
         echo -e "Compiling isolated libxml2 2.9.14 in ${prefix}..."
-        wget -c "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz" -O "/tmp/libxml2-2.9.14.tar.xz"
+        rm -f "/tmp/libxml2-2.9.14.tar.xz"
+        wget "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz" -O "/tmp/libxml2-2.9.14.tar.xz"
         check_return_code
         if [ "$(sha256sum "/tmp/libxml2-2.9.14.tar.xz" | cut -d' ' -f1)" != "60d74a257d1ccec0475e749cba2f21559e48139efba6ff28224357c7c798dfee" ]; then
             echo "libxml2 checksum mismatch"
