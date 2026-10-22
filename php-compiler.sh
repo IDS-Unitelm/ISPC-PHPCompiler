@@ -333,7 +333,8 @@ install_dependencies() {
         check_return_code
 
         # Attempt to install optional packages if available without breaking system
-        apt-get -y install libc-client2007e libc-client2007e-dev libldap2-dev libldb-dev 2>/dev/null || true
+        apt-get -y install libldap2-dev libldb-dev 2>/dev/null || true
+        apt-get -y install libc-client2007e libc-client2007e-dev 2>/dev/null || true
 
         # Check if development packages for SSL, XML, Zip, ICU can be installed from APT without conflicts
         # If conflicts are detected (e.g. sury.org PPA installed), build them into /opt/php-deps to protect production services (PHP 7.x)
@@ -633,6 +634,10 @@ compile() {
     jpg="--with-jpeg-dir=/usr"
     openssl="--with-openssl"
     ldap="--with-ldap"
+    if [ ! -f "/usr/include/ldap.h" ] && [ ! -f "/usr/local/include/ldap.h" ]; then
+        echo "LDAP development headers (ldap.h) not found. Skipping LDAP extension."
+        ldap=""
+    fi
     libxml="--with-libxml-dir=/usr"
     xmlrpc="--with-xmlrpc"
     imap="--with-imap --with-imap-ssl --with-kerberos"
