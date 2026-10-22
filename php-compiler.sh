@@ -155,7 +155,7 @@ detect_distro() {
 
 }
 
-install_isolated_deps_ubuntu1804() {
+install_isolated_deps() {
     local prefix="/opt/php-deps"
     local cpus
     cpus="$(grep -c ^processor /proc/cpuinfo 2>/dev/null || echo 2)"
@@ -339,7 +339,7 @@ install_dependencies() {
         # If conflicts are detected (e.g. sury.org PPA installed), build them into /opt/php-deps to protect production services (PHP 7.x)
         if ! apt-get -y install libssl-dev libxml2-dev libxslt1-dev libzip-dev libicu-dev 2>/dev/null; then
             echo "Third-party repository conflicts detected (e.g. sury.org). Installing isolated build dependencies in /opt/php-deps to protect running PHP services..."
-            install_isolated_deps_ubuntu1804
+            install_isolated_deps
         fi
 
         ln -s  /usr/include/x86_64-linux-gnu/curl  /usr/include/curl 2>/dev/null || true
@@ -351,20 +351,17 @@ install_dependencies() {
         apt-get -y install build-essential autoconf libfcgi-dev libfcgi0ldbl libmcrypt-dev libssl-dev libldb-dev libldap2-dev libc-client2007e libc-client2007e-dev libbz2-dev libcurl4-openssl-dev libjpeg-dev libfreetype6-dev libkrb5-dev libpq-dev libwebp-dev libvpx-dev libc-client2007e-dev libicu-dev libzip-dev pkg-config zlib1g-dev libsqlite3-dev libonig-dev icu-devtools libreadline-dev libgmp-dev
         check_return_code
         
-        # Install libxml2-dev and libxslt1-dev separately, handling version conflicts
-        # This allows apt to resolve dependencies with already installed libxml2 versions (e.g., from sury.org)
-        apt-get -y install libxml2-dev libxslt1-dev || {
-            echo "Trying alternative method for libxml2-dev installation..."
-            # If standard install fails, try with --allow-change-held-packages
-            apt-get -y --allow-change-held-packages install libxml2-dev libxslt1-dev || {
-                echo "Installing matching libxml2-dev version for current libxml2..."
-                # Install the -dev package that matches the currently installed libxml2 version
-                LIBXML2_VERSION=$(dpkg -s libxml2 2>/dev/null | grep '^Version:' | awk '{print $2}')
-                if [ -n "${LIBXML2_VERSION}" ]; then
-                    apt-get -y install libxml2-dev="${LIBXML2_VERSION}" libxslt1-dev || true
-                fi
-            }
-        }
+        # Install libxml2-dev and libxslt1-dev, automatically resolving sury.org version conflicts
+        if ! apt-get -y install libxml2-dev libxslt1-dev 2>/dev/null; then
+            echo "libxml2 version conflict detected (e.g. sury.org repository). Attempting automated resolution..."
+            UBUNTU_LIBXML2_VER=$(apt-cache madison libxml2 | grep -v 'sury' | awk '{print $3}' | head -n 1)
+            if [ -n "${UBUNTU_LIBXML2_VER}" ] && apt-get -y --allow-downgrades install libxml2="${UBUNTU_LIBXML2_VER}" libxml2-dev libxslt1-dev 2>/dev/null; then
+                echo "Successfully downgraded libxml2 to stock Ubuntu version (${UBUNTU_LIBXML2_VER}) and installed development headers."
+            else
+                echo "Could not downgrade libxml2 via APT. Installing isolated libxml2 and libxslt in /opt/php-deps..."
+                install_isolated_deps
+            fi
+        fi
         
         ln -s  /usr/include/x86_64-linux-gnu/curl  /usr/include/curl 2>/dev/null || true
         ln -s /usr/lib/libc-client.a /usr/lib/x86_64-linux-gnu/libc-client.a 2>/dev/null || true

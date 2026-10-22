@@ -1,6 +1,9 @@
 # Setup per Ubuntu 20.04
 
-Questo documento contiene le istruzioni per preparare un sistema Ubuntu 20.04 per la compilazione di PHP utilizzando questo script.
+Questo documento contiene le istruzioni e i dettagli tecnici per preparare un sistema Ubuntu 20.04 per la compilazione di PHP utilizzando questo script.
+
+> [!NOTE]
+> **Risoluzione Automatica**: Nelle versioni recenti dello script `php-compiler.sh`, il conflitto con `libxml2` di sury.org viene rilevato e **risolto automaticamente** durante lo step di installazione dipendenze (tramite rilevamento dinamico della versione Ubuntu ufficiale e downgrade APT, oppure compilazione isolata di fallback in `/opt/php-deps`). Non è più necessario eseguire comandi manuali prima di avviare lo script.
 
 ## ⚠️ Problema libxml2 con Repository sury.org
 
@@ -13,7 +16,7 @@ Ubuntu 20.04 con repository sury.org attivi ha spesso libxml2 versione 2.9.14, m
 - Errore durante ./configure: `Package requirements (libxml-2.0 >= 2.9.0) were not met`
 - File `libxml-2.0.pc` non trovato
 
-## 🔧 Soluzione: Downgrade libxml2
+## 🔧 Soluzione: Downgrade Automatico o Manuale di libxml2
 
 Il downgrade a libxml2 2.9.10 (versione Ubuntu standard) risolve il problema ed è **completamente sicuro** per tutte le versioni PHP.
 
