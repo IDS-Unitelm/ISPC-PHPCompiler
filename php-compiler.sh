@@ -171,7 +171,7 @@ install_isolated_deps_ubuntu1804() {
     if [ ! -f "${prefix}/lib/libssl.so" ] && [ ! -f "${prefix}/lib64/libssl.so" ]; then
         echo -e "Compiling isolated OpenSSL 1.1.1w in ${prefix}..."
         rm -f "/tmp/openssl-1.1.1w.tar.gz"
-        wget "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" -O "/tmp/openssl-1.1.1w.tar.gz"
+        wget --no-check-certificate "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" -O "/tmp/openssl-1.1.1w.tar.gz"
         check_return_code
         if [ "$(sha256sum "/tmp/openssl-1.1.1w.tar.gz" | cut -d' ' -f1)" != "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8" ]; then
             echo "OpenSSL checksum mismatch"
@@ -188,7 +188,7 @@ install_isolated_deps_ubuntu1804() {
     if [ ! -f "${prefix}/lib/libxml2.so" ] && [ ! -f "${prefix}/lib64/libxml2.so" ]; then
         echo -e "Compiling isolated libxml2 2.9.14 in ${prefix}..."
         rm -f "/tmp/libxml2-2.9.14.tar.xz"
-        wget "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz" -O "/tmp/libxml2-2.9.14.tar.xz"
+        wget --no-check-certificate "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz" -O "/tmp/libxml2-2.9.14.tar.xz"
         check_return_code
         if [ "$(sha256sum "/tmp/libxml2-2.9.14.tar.xz" | cut -d' ' -f1)" != "60d74a257d1ccec0475e749cba2f21559e48139efba6ff28224357c7c798dfee" ]; then
             echo "libxml2 checksum mismatch"
@@ -205,7 +205,7 @@ install_isolated_deps_ubuntu1804() {
     if [ ! -f "${prefix}/lib/libxslt.so" ] && [ ! -f "${prefix}/lib64/libxslt.so" ]; then
         echo -e "Compiling isolated libxslt 1.1.39 in ${prefix}..."
         rm -f "/tmp/libxslt-1.1.39.tar.xz"
-        wget "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.39.tar.xz" -O "/tmp/libxslt-1.1.39.tar.xz"
+        wget --no-check-certificate "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.39.tar.xz" -O "/tmp/libxslt-1.1.39.tar.xz"
         check_return_code
         if [ "$(sha256sum "/tmp/libxslt-1.1.39.tar.xz" | cut -d' ' -f1)" != "2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" ]; then
             echo "libxslt checksum mismatch"
@@ -222,7 +222,7 @@ install_isolated_deps_ubuntu1804() {
     if [ ! -f "${prefix}/lib/libzip.so" ] && [ ! -f "${prefix}/lib64/libzip.so" ]; then
         echo -e "Compiling isolated libzip 0.11.2 in ${prefix}..."
         rm -f "/tmp/libzip-0.11.2.tar.gz"
-        wget "https://libzip.org/download/libzip-0.11.2.tar.gz" -O "/tmp/libzip-0.11.2.tar.gz"
+        wget --no-check-certificate "https://libzip.org/download/libzip-0.11.2.tar.gz" -O "/tmp/libzip-0.11.2.tar.gz"
         check_return_code
         if [ "$(sha256sum "/tmp/libzip-0.11.2.tar.gz" | cut -d' ' -f1)" != "83db1fb43a961ff7d1d1b50e1c6bea09c67e6af867686d1fc92ecb7dc6cf98d5" ]; then
             echo "libzip checksum mismatch"
@@ -239,7 +239,7 @@ install_isolated_deps_ubuntu1804() {
     if [ ! -f "${prefix}/lib/libicuuc.so" ] && [ ! -f "${prefix}/lib64/libicuuc.so" ]; then
         echo -e "Compiling isolated ICU 69.1 in ${prefix}..."
         rm -f "/tmp/icu4c-69_1-src.tgz"
-        wget "https://github.com/unicode-org/icu/releases/download/release-69-1/icu4c-69_1-src.tgz" -O "/tmp/icu4c-69_1-src.tgz"
+        wget --no-check-certificate "https://github.com/unicode-org/icu/releases/download/release-69-1/icu4c-69_1-src.tgz" -O "/tmp/icu4c-69_1-src.tgz"
         check_return_code
         if [ "$(sha256sum "/tmp/icu4c-69_1-src.tgz" | cut -d' ' -f1)" != "4cba7b7acd1d3c42c44bb0c14be6637098c7faf2b330ce876bc5f3b915d09745" ]; then
             echo "ICU checksum mismatch"
