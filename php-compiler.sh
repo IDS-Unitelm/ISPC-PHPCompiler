@@ -384,7 +384,19 @@ install_dependencies() {
     fi
     
     if [ "${DISTRO}" == "centos7" ]; then
-        yum -y --nogpgcheck install gcc make libc-client-devel libxml2-devel pkgconfig openssl-devel bzip2-devel libldb-devel curl-devel libpng-devel libpng-devel libjpeg-devel libXpm-devel freetype-devel gmp-devel libmcrypt-devel mariadb-devel aspell-devel recode-devel httpd-devel postgresql-devel libxslt-devel libwebp-devel libvpx-devel libicu-devel gcc-c++ pkg-config zlib-devel libsqlite3x-devel oniguruma-devel readline-devel
+        local mysql_dev_pkg="mariadb-devel"
+        if rpm -q MariaDB-compat >/dev/null 2>&1 || rpm -q MariaDB-server >/dev/null 2>&1; then
+            # MariaDB official repo packages installed; avoid conflict with base mariadb-libs
+            if rpm -q MariaDB-devel >/dev/null 2>&1; then
+                mysql_dev_pkg=""
+            else
+                mysql_dev_pkg="MariaDB-devel"
+            fi
+        elif rpm -q mariadb-devel >/dev/null 2>&1; then
+            mysql_dev_pkg=""
+        fi
+
+        yum -y --nogpgcheck install gcc make libc-client-devel libxml2-devel pkgconfig openssl-devel bzip2-devel libldb-devel curl-devel libpng-devel libjpeg-devel libXpm-devel freetype-devel gmp-devel libmcrypt-devel ${mysql_dev_pkg} aspell-devel recode-devel httpd-devel postgresql-devel libxslt-devel libwebp-devel libvpx-devel libicu-devel gcc-c++ pkg-config zlib-devel libsqlite3x-devel oniguruma-devel readline-devel
         check_return_code
 
         wget https://libzip.org/download/libzip-0.11.2.tar.gz -O /tmp/libzip-0.11.2.tar.gz
