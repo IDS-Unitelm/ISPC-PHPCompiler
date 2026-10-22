@@ -251,6 +251,14 @@ install_isolated_deps() {
         check_return_code
         rm -rf "/tmp/icu" "/tmp/icu4c-69_1-src.tgz"
     fi
+
+    # Ensure system dynamic linker knows about /opt/php-deps libraries
+    if [ -d "${prefix}/lib" ] || [ -d "${prefix}/lib64" ]; then
+        if [ ! -f "/etc/ld.so.conf.d/php-deps.conf" ]; then
+            echo -e "${prefix}/lib\n${prefix}/lib64" > /etc/ld.so.conf.d/php-deps.conf
+        fi
+        ldconfig
+    fi
 }
 
 install_dependencies() {
@@ -547,6 +555,10 @@ EOF
 
 sed -i "s:&NAME&:${1}:g" "/lib/systemd/system/${1}-fpm.service"
 sed -i "s:&PATH&:${2}:g" "/lib/systemd/system/${1}-fpm.service"
+
+if [ -d "/opt/php-deps/lib" ] || [ -d "/opt/php-deps/lib64" ]; then
+    sed -i '/\[Service\]/a Environment="LD_LIBRARY_PATH=/opt/php-deps/lib:/opt/php-deps/lib64"' "/lib/systemd/system/${1}-fpm.service"
+fi
 }
 
 compile_openssl() {
