@@ -50,7 +50,7 @@ download_extract() {
     FOLDER_NAME=${ARCHIVE_NAME/.tar.gz/}
 
     echo -e "Downloading ${1}..."
-    wget "${1}" -O "${COMPILE_PATH}/${ARCHIVE_NAME}"
+    wget --no-check-certificate "${1}" -O "${COMPILE_PATH}/${ARCHIVE_NAME}"
     check_return_code
 
     if [ "$(sha256sum "${COMPILE_PATH}/${ARCHIVE_NAME}" | cut -d' ' -f1)" != "${2}" ]; then
