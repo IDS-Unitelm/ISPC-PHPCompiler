@@ -196,7 +196,8 @@ install_isolated_deps_ubuntu1804() {
     # 3. libxslt 1.1.34
     if [ ! -f "${prefix}/lib/libxslt.so" ] && [ ! -f "${prefix}/lib64/libxslt.so" ]; then
         echo -e "Compiling isolated libxslt 1.1.34 in ${prefix}..."
-        wget -c "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.34.tar.xz" -O "/tmp/libxslt-1.1.34.tar.xz"
+        rm -f "/tmp/libxslt-1.1.34.tar.xz"
+        wget "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.34.tar.xz" -O "/tmp/libxslt-1.1.34.tar.xz"
         check_return_code
         if [ "$(sha256sum "/tmp/libxslt-1.1.34.tar.xz" | cut -d' ' -f1)" != "28c47db33ab4daefa6232f31ccb3c65260c825151ec86ec461355247f3f56824" ]; then
             echo "libxslt checksum mismatch"
@@ -212,7 +213,8 @@ install_isolated_deps_ubuntu1804() {
     # 4. libzip 0.11.2
     if [ ! -f "${prefix}/lib/libzip.so" ] && [ ! -f "${prefix}/lib64/libzip.so" ]; then
         echo -e "Compiling isolated libzip 0.11.2 in ${prefix}..."
-        wget -c "https://libzip.org/download/libzip-0.11.2.tar.gz" -O "/tmp/libzip-0.11.2.tar.gz"
+        rm -f "/tmp/libzip-0.11.2.tar.gz"
+        wget "https://libzip.org/download/libzip-0.11.2.tar.gz" -O "/tmp/libzip-0.11.2.tar.gz"
         check_return_code
         if [ "$(sha256sum "/tmp/libzip-0.11.2.tar.gz" | cut -d' ' -f1)" != "83db1fb43a961ff7d1d1b50e1c6bea09c67e6af867686d1fc92ecb7dc6cf98d5" ]; then
             echo "libzip checksum mismatch"
@@ -228,7 +230,8 @@ install_isolated_deps_ubuntu1804() {
     # 5. ICU 69.1 (for intl extension)
     if [ ! -f "${prefix}/lib/libicuuc.so" ] && [ ! -f "${prefix}/lib64/libicuuc.so" ]; then
         echo -e "Compiling isolated ICU 69.1 in ${prefix}..."
-        wget -c "https://github.com/unicode-org/icu/releases/download/release-69-1/icu4c-69_1-src.tgz" -O "/tmp/icu4c-69_1-src.tgz"
+        rm -f "/tmp/icu4c-69_1-src.tgz"
+        wget "https://github.com/unicode-org/icu/releases/download/release-69-1/icu4c-69_1-src.tgz" -O "/tmp/icu4c-69_1-src.tgz"
         check_return_code
         if [ "$(sha256sum "/tmp/icu4c-69_1-src.tgz" | cut -d' ' -f1)" != "4cba7b7acd1d3c42c44bb0c14be6637098c7faf2b330ce876bc5f3b915d09745" ]; then
             echo "ICU checksum mismatch"
