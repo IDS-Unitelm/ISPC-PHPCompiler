@@ -402,19 +402,7 @@ install_dependencies() {
     fi
     
     if [ "${DISTRO}" == "centos7" ]; then
-        local mysql_dev_pkg="mariadb-devel"
-        if rpm -q MariaDB-compat >/dev/null 2>&1 || rpm -q MariaDB-server >/dev/null 2>&1; then
-            # MariaDB official repo packages installed; avoid conflict with base mariadb-libs
-            if rpm -q MariaDB-devel >/dev/null 2>&1; then
-                mysql_dev_pkg=""
-            else
-                mysql_dev_pkg="MariaDB-devel"
-            fi
-        elif rpm -q mariadb-devel >/dev/null 2>&1; then
-            mysql_dev_pkg=""
-        fi
-
-        yum -y --nogpgcheck install gcc make libc-client-devel libxml2-devel pkgconfig openssl-devel bzip2-devel libldb-devel curl-devel libpng-devel libjpeg-devel libXpm-devel freetype-devel gmp-devel libmcrypt-devel ${mysql_dev_pkg} aspell-devel recode-devel httpd-devel postgresql-devel libxslt-devel libwebp-devel libvpx-devel libicu-devel gcc-c++ pkg-config zlib-devel libsqlite3x-devel oniguruma-devel readline-devel
+        yum -y --nogpgcheck install gcc make libc-client-devel libxml2-devel pkgconfig openssl-devel bzip2-devel libldb-devel curl-devel libpng-devel libjpeg-devel libXpm-devel freetype-devel gmp-devel libmcrypt-devel aspell-devel recode-devel httpd-devel postgresql-devel libxslt-devel libwebp-devel libvpx-devel libicu-devel gcc-c++ pkg-config zlib-devel libsqlite3x-devel oniguruma-devel readline-devel
         check_return_code
 
         wget https://libzip.org/download/libzip-0.11.2.tar.gz -O /tmp/libzip-0.11.2.tar.gz
@@ -676,6 +664,8 @@ compile() {
     jpg="--with-jpeg-dir=/usr"
     openssl="--with-openssl"
     ldap="--with-ldap"
+    pdo_mysql="--with-pdo-mysql"
+    mysqli="--with-mysqli"
     if [ "${DISTRO}" == "ubuntu-18.04" ] || [ -d "/opt/php-deps" ] || { [ ! -f "/usr/include/ldap.h" ] && [ ! -f "/usr/local/include/ldap.h" ]; }; then
         echo "Skipping LDAP extension."
         ldap=""
@@ -707,6 +697,11 @@ compile() {
         if [ "${CURRENT_PHP_VERSION}" -gt 72 ]; then
                 ADDITIONAL_CFLAGS=""
         fi
+    fi
+
+    if [ "${DISTRO}" == "centos7" ]; then
+        pdo_mysql="--with-pdo-mysql=mysqlnd"
+        mysqli="--with-mysqli=mysqlnd"
     fi
 
     if [ "${DISTRO}" == "ubuntu-14.04" ]; then
@@ -760,7 +755,7 @@ compile() {
         --with-zlib ${gd} --with-pgsql --disable-rpath --enable-inline-optimization \
         --with-bz2 --with-zlib --enable-sockets --enable-sysvsem --enable-sysvshm \
         --enable-pcntl --enable-mbregex --enable-exif --enable-bcmath --with-mhash \
-        ${zip} --with-pcre-regex --with-pdo-mysql --with-mysqli --with-mysql-sock=/var/run/mysqld/mysqld.sock \
+        ${zip} --with-pcre-regex ${pdo_mysql} ${mysqli} --with-mysql-sock=/var/run/mysqld/mysqld.sock \
         ${jpg} --with-png-dir=/usr ${openssl} --with-fpm-user=www-data \
         --with-fpm-group=www-data ${libdir} --enable-ftp ${imap} ${ldap} \
         --with-gettext ${xmlrpc} ${webp} --with-xsl \
