@@ -25,8 +25,12 @@ check_return_code() {
 install_utils() {
     echo -e "Installing required packages..."
     if [ "${DISTRO}" == "centos7" ]; then
-        yum -y install epel-release whiptail curl wget ca-certificates
+        yum -y install epel-release newt curl ca-certificates
         check_return_code
+        if ! command -v wget >/dev/null 2>&1; then
+            yum -y install wget
+            check_return_code
+        fi
     elif [ "${DISTRO}" == "centos8" ]; then
         yum -y install epel-release curl wget
         check_return_code
