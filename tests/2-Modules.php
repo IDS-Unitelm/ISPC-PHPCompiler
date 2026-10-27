@@ -22,6 +22,7 @@ $modules = [
     'json',
     'libxml',
     'mbstring',
+    'mcrypt',
     'mysqli',
     'mysqlnd',
     'openssl',
@@ -55,6 +56,10 @@ $modules = [
     'gmp',
     'ldap'
 ];
+
+if (version_compare(PHP_VERSION, '7.2.0', '>=')) {
+    $modules[] = 'sodium';
+}
 
 $e = 0;
 

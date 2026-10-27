@@ -29,6 +29,12 @@ wget https://raw.githubusercontent.com/IDS-Unitelm/ISPC-PHPCompiler/bash-version
 (**) On Ubuntu 18.04, third-party repository conflicts (e.g. `deb.sury.org`) are automatically handled by compiling dependencies (OpenSSL 1.1.1w, libxml2, libxslt, libzip, ICU) into `/opt/php-deps` with runtime RPATH isolation, leaving existing production PHP services intact.
 (***) On Ubuntu 22.x PHP <= 8.0 only without OpenSSL.
 
+## Cryptography extensions
+
+The build enables PHP's bundled Sodium extension for PHP 7.2 and newer and installs the distribution's `libsodium` development package. Mcrypt is built into PHP through 7.1; for PHP 7.2 and newer the script builds the pinned PECL mcrypt 1.0.9 source with a verified SHA-256 checksum and enables it in that PHP installation's `php.ini`.
+
+Mcrypt is a legacy extension retained for compatibility with existing applications. Do not use it for new cryptographic designs; prefer Sodium.
+
 ## Experimental: PHP 7.4 CVE mitigation
 
 The menu includes **PHP 7.4.31-dev CVE-2026 patched**, built from the PHP source commit `712e60f9edfd03f0960fc4fc3c2c375f42b90aa2` on the upstream `PHP-7.4-CVE-2026-109618-109619` branch. The source archive is pinned to that commit and verified with SHA-256 before extraction; the build does not follow the moving branch name. This commit's `main/php_version.h` identifies it as PHP 7.4.31-dev, not 7.4.33.

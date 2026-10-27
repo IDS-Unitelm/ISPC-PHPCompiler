@@ -10,6 +10,8 @@ CURRENT_PHP_VERSION="" # like 70
 OUTPUT=""
 PHP_74_CVE_SELECTION="PHP 7.4.31-dev CVE-2026 patched"
 PHP_74_CVE_SOURCE_DIR="php-src-712e60f9edfd03f0960fc4fc3c2c375f42b90aa2"
+MCRYPT_PECL_VERSION="1.0.9"
+MCRYPT_PECL_SHA256="2a9ef0817d3bf677f6d7baf8e325629a2758974735d8abad6566384788d424a5"
 
 #-- Helpers Functions
 
@@ -84,6 +86,21 @@ install_php_source_build_tools() {
         dnf -y install autoconf bison re2c
     else
         apt-get -y install autoconf bison re2c
+    fi
+    check_return_code
+}
+
+install_crypto_build_dependencies() {
+    if [ "${CURRENT_PHP_VERSION}" -lt 72 ]; then
+        return
+    fi
+
+    if [ "${DISTRO}" == "centos7" ]; then
+        yum -y install libsodium-devel autoconf automake libtool pkgconfig
+    elif [ "${DISTRO}" == "centos8" ]; then
+        dnf -y install libsodium-devel autoconf automake libtool pkg-config
+    else
+        apt-get -y install libsodium-dev autoconf automake libtool pkg-config
     fi
     check_return_code
 }
@@ -668,8 +685,14 @@ compile() {
     jpg="--with-jpeg-dir=/usr"
     openssl="--with-openssl"
     ldap="--with-ldap"
+    mcrypt="--with-mcrypt"
+    sodium=""
     pdo_mysql="--with-pdo-mysql"
     mysqli="--with-mysqli"
+    if [ "${CURRENT_PHP_VERSION}" -ge 72 ]; then
+        mcrypt=""
+        sodium="--with-sodium"
+    fi
     if [ "${DISTRO}" == "ubuntu-18.04" ] || [ -d "/opt/php-deps" ] || { [ ! -f "/usr/include/ldap.h" ] && [ ! -f "/usr/local/include/ldap.h" ]; }; then
         echo "Skipping LDAP extension."
         ldap=""
@@ -755,7 +778,7 @@ compile() {
     # shellcheck disable=SC2086
     (cd "${COMPILE_PATH}/${FOLDER_NAME}" && ./configure CFLAGS="-O3 ${ADDITIONAL_CFLAGS}" \
         --prefix=${CURRENT_PHP_PATH} --with-pdo-pgsql --with-zlib-dir ${freetype} --enable-mbstring \
-        ${libxml} --enable-soap --enable-calendar --with-curl --with-mcrypt \
+        ${libxml} --enable-soap --enable-calendar --with-curl ${mcrypt} ${sodium} \
         --with-zlib ${gd} --with-pgsql --disable-rpath --enable-inline-optimization \
         --with-bz2 --with-zlib --enable-sockets --enable-sysvsem --enable-sysvshm \
         --enable-pcntl --enable-mbregex --enable-exif --enable-bcmath --with-mhash \
@@ -778,6 +801,36 @@ compile() {
 
     make -C "${COMPILE_PATH}/${FOLDER_NAME}" install
     check_return_code
+}
+
+install_pecl_mcrypt() {
+    if [ "${CURRENT_PHP_VERSION}" -lt 72 ]; then
+        return
+    fi
+
+    local archive="/tmp/mcrypt-${MCRYPT_PECL_VERSION}.tgz"
+    local source_dir="/tmp/mcrypt-${MCRYPT_PECL_VERSION}"
+    local extension_dir
+    extension_dir=$("${CURRENT_PHP_PATH}/bin/php-config" --extension-dir)
+    check_return_code
+
+    if [ ! -f "${extension_dir}/mcrypt.so" ]; then
+        wget --no-check-certificate "https://pecl.php.net/get/mcrypt-${MCRYPT_PECL_VERSION}.tgz" -O "${archive}"
+        check_return_code
+        if [ "$(sha256sum "${archive}" | cut -d' ' -f1)" != "${MCRYPT_PECL_SHA256}" ]; then
+            echo "PECL mcrypt ${MCRYPT_PECL_VERSION} checksum mismatch"
+            exit 126
+        fi
+        tar -xzf "${archive}" -C /tmp
+        check_return_code
+        (cd "${source_dir}" && "${CURRENT_PHP_PATH}/bin/phpize" && ./configure --with-php-config="${CURRENT_PHP_PATH}/bin/php-config" && make -j"$(grep -c ^processor /proc/cpuinfo)" && make install)
+        check_return_code
+        rm -rf "${source_dir}" "${archive}"
+    fi
+
+    if ! grep -Fxq 'extension=mcrypt.so' "${CURRENT_PHP_PATH}/lib/php.ini"; then
+        echo "extension=mcrypt.so" >> "${CURRENT_PHP_PATH}/lib/php.ini"
+    fi
 }
 
 install() {
@@ -820,6 +873,7 @@ install() {
     systemctl daemon-reload
 
     echo "zend_extension=opcache.so" >> "${CURRENT_PHP_PATH}/lib/php.ini"
+    install_pecl_mcrypt
 
     systemctl start "${CURRENT_PHP_NAME}-fpm.service"
 }
@@ -891,6 +945,7 @@ elaborate_selection() {
 
     echo -e "Checking compile path..."
     check_folder "${COMPILE_PATH}"
+    install_crypto_build_dependencies
 
     if [ "${USER_SELECTION}" == "${PHP_74_CVE_SELECTION}" ]; then
         download_extract "${VERSIONS[$USER_SELECTION]}" "${CHECKSUM[$USER_SELECTION]}" "${PHP_74_CVE_SOURCE_DIR}"
@@ -908,6 +963,7 @@ elaborate_selection() {
         install
     else
         compile
+        install_pecl_mcrypt
         echo -e "Restarting services..."
         systemctl restart "${CURRENT_PHP_NAME}-fpm.service"
     fi
